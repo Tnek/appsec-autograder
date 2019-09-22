@@ -1,3 +1,4 @@
+import bcrypt
 from app import db
 
 
@@ -8,15 +9,18 @@ class Base(db.Model):
 class User(Base):
     __tablename__ = "auth_user"
 
-    name = db.Column(db.String(128), nullable=False)
+    username = db.Column(db.String(128), nullable=False)
     password = db.Column(db.String(192), nullable=False)
-    role = db.Column(db.SmallInteger, nullable=False)
+    twofactor = db.Column(db.String(17), nullable=False)
 
     def __repr__(self):
         return "<User %s>" % (self.name)
 
 
-def register_user(username, password, role):
+def register_user(username, password, twofactor):
+    if not username or not password:
+        return False, "Missing username or password"
+
     user = User.query.filter_by(username=username).first()
 
     if user:
@@ -26,15 +30,20 @@ def register_user(username, password, role):
         return False, "Password too short"
 
     hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    new_user = User(username=username, password=hashed, role=role)
+    new_user = User(username=username, password=hashed, twofactor=twofactor)
     db.session.add(new_user)
     db.session.commit()
 
     return True, None
 
 
-def check_user(username, password):
-    user = User.query.filter_by(username=username).first()
+def check_user(username, password, twofactor):
+    if not username or not password or not twofactor:
+        return False, "Missing username or password or 2fa"
+
+    user = (
+        User.query.filter_by(username=username).filter_by(twofactor=twofactor).first()
+    )
     if not user:
         return False, "User does not exist"
 
@@ -42,23 +51,3 @@ def check_user(username, password):
         return True, None
 
     return False, "Incorrect password"
-
-
-def check_permission(username, role):
-    user = User.query.filter_by(username=username).first()
-
-    if not user:
-        return False, "User does not exist"
-
-    return role <= user.role, None
-
-
-def update_permission(username, to_update_name, role):
-    ok, err = check_permission(username, role)
-    if not ok:
-        return False, err
-
-    updated_user = User.query.filter_by(username=to_update_name).first()
-    updated_user.role = role
-    db.session.commit()
-    return True, None

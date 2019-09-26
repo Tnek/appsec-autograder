@@ -1,5 +1,5 @@
 import bcrypt
-from app import db
+from . import db
 
 
 class Base(db.Model):

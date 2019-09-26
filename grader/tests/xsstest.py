@@ -1,5 +1,5 @@
 import unittest
-from ..text_fixture import WebFixture
+from text_fixture import WebFixture
 from gradescope_utils.autograder_utils.decorators import weight, visibility
 
 

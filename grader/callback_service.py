@@ -10,7 +10,7 @@ sessions = {}
 @app.route("/cb")
 def callback():
     """ Exploits firing will callback here """
-    sessid = request.args.get("tid", None)
+    sessid = request.args.get("sid", None)
     testid = request.args.get("tid", None)
 
     if not sessid or not testid:
@@ -30,11 +30,9 @@ def grade():
     """ Returns summary of callbacks as blob """
     sessid = request.args.get("sid", None)
     if not sessid:
-        err = "missing sessid"
-        logging.warn(err)
-        return err, 403
+        logging.warn("missing sessid")
 
-    ret = sessions.get(sessid, {})
+    ret = sessions.get(sessid, [])
     return json.dumps(ret)
 
 

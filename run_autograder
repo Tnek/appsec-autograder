@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEBUG=1
-RESULTS_PATH=results.json
+RESULTS_PATH=$(pwd)/results.json
 
 if [ -z $DEBUG ]; then
     mkdir /autograder/source/sample_project
@@ -13,15 +13,18 @@ fi
 
 declare -a SERVICES
 
-python grader/callback_service.py &
+python grader/callback_service.py > /dev/null 2>&1 &
 SERVICES[0]="$!"
 
 cd sample_project
-flask run -p 5000 &
+flask run -p 5000 > /dev/null 2>&1 &
 SERVICES[1]="$!"
-cd ..
-
-python grader/grader_runner.py > $RESULTS_PATH
+cd ../grader
+python grader_runner.py > $RESULTS_PATH
 
 kill ${SERVICES[0]}
 kill ${SERVICES[1]}
+
+cd ..
+
+cat results.json

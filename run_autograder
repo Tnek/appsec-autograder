@@ -1,0 +1,27 @@
+#!/bin/bash
+
+DEBUG=1
+RESULTS_PATH=results.json
+
+if [ -z $DEBUG ]; then
+    mkdir /autograder/source/sample_project
+    cp -r /autograder/submission/* /autograder/source/sample_project
+
+    cd /autograder/source
+    RESULTS_PATH=/autograder/results/results.json
+fi
+
+declare -a SERVICES
+
+python grader/callback_service.py &
+SERVICES[0]="$!"
+
+cd sample_project
+flask run -p 5000 &
+SERVICES[1]="$!"
+cd ..
+
+python grader/grader_runner.py > $RESULTS_PATH
+
+kill ${SERVICES[0]}
+kill ${SERVICES[1]}

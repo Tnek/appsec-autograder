@@ -85,10 +85,11 @@ def initSession(uname, pword, twofactor):
     return s
 
 
-def spellcheck(test_text, uname, pword, twofactor):
+def spellcheck(test_text, uname, pword, twofactor, s=None):
     spellcheck_addr = SERVICE_ADDR + "/spell_check"
 
-    s = initSession(uname, pword, twofactor)
+    if s == None:
+        s = initSession(uname, pword, twofactor)
     spellcheck_args = {}
 
     form = getSpellcheckForm(s)

@@ -28,8 +28,8 @@ class FeatureTest(unittest.TestCase):
         """
         login_addr = SERVICE_ADDR + "/login"
 
-        login("null", "null", "1234")
-        self.assertFalse(login, "Login authenticated an invalid uname/password/2fa")
+        ok = login("null", "null", "1234")
+        self.assertFalse(ok, "Login authenticated an invalid uname/password/2fa")
 
     @weight(1)
     def test_xsrf(self):

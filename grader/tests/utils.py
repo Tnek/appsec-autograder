@@ -61,7 +61,7 @@ def login(uname, pword, twofactor, session=None):
     test_creds = {"uname": uname, "pword": pword, "2fa": twofactor}
     r = session.post(addr, data=test_creds)
     success = getElementById(r.text, "result")
-    assert success != None, "Missing id='result' in your register response"
+    assert success != None, "Missing id='result' in your login response"
 
     return "success" in success.text
 

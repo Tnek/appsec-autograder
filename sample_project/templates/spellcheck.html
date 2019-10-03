@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block title %}Spellcheck{% endblock %}
+{% block body %}
+
+<form method="POST" action="/spellcheck" id="inputtext">
+    <input type="text" id="words" name="words" placeholder="Spellcheck me">
+    <input type="text" id="xsrf_token" name="xsrf_token" value="1234">
+</form>
+
+{% endblock %}

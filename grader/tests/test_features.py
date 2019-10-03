@@ -1,10 +1,10 @@
 import unittest
 
 import requests
-from bs4 import BeautifulSoup
 from gradescope_utils.autograder_utils.decorators import weight, visibility
 
 from utils import *
+from config import SERVICE_ADDR
 
 
 class FeatureTest(unittest.TestCase):
@@ -28,12 +28,8 @@ class FeatureTest(unittest.TestCase):
         """
         login_addr = SERVICE_ADDR + "/login"
 
-        r = requests.post(
-            reg_addr, data={"uname": "null", "pword": "null", "2fa": "1234"}
-        )
-
-        result = getElementById(r.text, "result")
-        self.assertTrue("incorrect" in result.text)
+        login("null", "null", "1234")
+        self.assertFalse(login, "Login authenticated an invalid uname/password/2fa")
 
     @weight(1)
     def test_xsrf(self):
@@ -46,7 +42,7 @@ class FeatureTest(unittest.TestCase):
         inputs = input_form.find_all("input")
 
         token, remainder = filterXsrfToken(inputs)
-        self.assertIsNotNone(token)
+        self.assertIsNotNone(token, "Missing xsrf token")
 
     @weight(1)
     def test_spellcheck(self):

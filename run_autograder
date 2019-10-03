@@ -20,6 +20,8 @@ cd sample_project
 flask run -p 5000 > /dev/null 2>&1 &
 SERVICES[1]="$!"
 cd ../grader
+sleep 3s
+
 python grader_runner.py > $RESULTS_PATH
 
 kill ${SERVICES[0]}

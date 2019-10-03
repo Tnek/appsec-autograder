@@ -1,8 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-
-SERVICE_ADDR = "http://127.0.0.1:5000"
-REPORTER_ADDR = "http://127.0.0.1:31337"
+from config import SERVICE_ADDR
 
 
 def getElementById(text, eid):
@@ -48,8 +46,10 @@ def registerAccount(uname, pword, twofactor, session=None):
         session = requests.Session()
 
     test_creds = {"uname": uname, "pword": pword, "2fa": twofactor}
-    r = s.post(addr, data=test_creds)
+    r = session.post(addr, data=test_creds)
     success = getElementById(r.text, "success")
+    assert success != None, "Missing id='success' in your register response"
+
     return "success" in success.text
 
 
@@ -59,24 +59,34 @@ def login(uname, pword, twofactor, session=None):
         session = requests.Session()
 
     test_creds = {"uname": uname, "pword": pword, "2fa": twofactor}
-    r = s.post(addr, data=test_creds)
+    r = session.post(addr, data=test_creds)
     success = getElementById(r.text, "result")
+    assert success != None, "Missing id='result' in your register response"
+
     return "success" in success.text
 
 
 def initSession(uname, pword, twofactor):
     s = requests.Session()
     ok = registerAccount(uname, pword, twofactor, s)
-    assert ok
+    assert ok, "Registration failed with uname=%s, pword=%s, and 2fa=%s" % (
+        uname,
+        pword,
+        twofactor,
+    )
 
     ok = login(uname, pword, twofactor, s)
-    assert ok
+    assert ok, "Login failed with uname=%s, pword=%s, and 2fa=%s" % (
+        uname,
+        pword,
+        twofactor,
+    )
 
     return s
 
 
 def spellcheck(test_text, uname, pword, twofactor):
-    s = init_test_session(uname, pword, twofactor)
+    s = initSession(uname, pword, twofactor)
     spellcheck_args = {}
 
     form = getSpellcheckForm(s)

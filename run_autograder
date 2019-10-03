@@ -13,7 +13,7 @@ fi
 
 declare -a SERVICES
 
-python grader/callback_service.py > /dev/null 2>&1 &
+python3 grader/callback_service.py > /dev/null 2>&1 &
 SERVICES[0]="$!"
 
 cd sample_project
@@ -22,7 +22,7 @@ SERVICES[1]="$!"
 cd ../grader
 sleep 3s
 
-python grader_runner.py > $RESULTS_PATH
+python3 grader_runner.py > $RESULTS_PATH
 
 kill ${SERVICES[0]}
 kill ${SERVICES[1]}

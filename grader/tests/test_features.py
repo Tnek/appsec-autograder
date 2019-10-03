@@ -39,10 +39,20 @@ class FeatureTest(unittest.TestCase):
         s = initSession(uname, pword, twofactor)
 
         form = getSpellcheckForm(s)
-        inputs = input_form.find_all("input")
+        inputs = form.find_all("input")
 
         token, remainder = filterXsrfToken(inputs)
-        self.assertIsNotNone(token, "Missing xsrf token")
+        self.assertIsNotNone(token, "Missing csrf token")
+
+        # Check for repeating xsrf token
+        s = initSession(uname + "2", pword, twofactor)
+        form = getSpellcheckForm(s)
+        inputs = form.find_all("input")
+
+        second_token, remainder = filterXsrfToken(inputs)
+        self.assertNotEqual(
+            second_token.get("value"), token.get("value"), "Using static CSRF token"
+        )
 
     @weight(1)
     def test_spellcheck(self):

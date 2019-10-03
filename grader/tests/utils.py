@@ -35,7 +35,7 @@ def getSpellcheckForm(sess=None):
     spellcheck_addr = SERVICE_ADDR + "/spell_check"
     r = sess.get(spellcheck_addr)
 
-    spellcheck = BeautifulSoup(r.text, "html.parser")
+    soup = BeautifulSoup(r.text, "html.parser")
     input_form = soup.find("form", id="inputtext")
     return input_form
 
@@ -86,11 +86,15 @@ def initSession(uname, pword, twofactor):
 
 
 def spellcheck(test_text, uname, pword, twofactor):
+    spellcheck_addr = SERVICE_ADDR + "/spell_check"
+
     s = initSession(uname, pword, twofactor)
     spellcheck_args = {}
 
     form = getSpellcheckForm(s)
-    inputs = input_form.find_all("input")
+    assert form != None, "Spellcheck form is missing id='inputtext'"
+
+    inputs = form.find_all("input")
     token, remainder = filterXsrfToken(inputs)
 
     if token is not None:
@@ -100,9 +104,11 @@ def spellcheck(test_text, uname, pword, twofactor):
     for i in remainder:
         spellcheck_args[i.get("name")] = test_text
 
-    sc_method = form.get("method")
+    sc_method = form.get("method", "get").lower()
 
     if sc_method == "post":
         r = s.request(sc_method, spellcheck_addr)
     elif sc_method == "get":
         r = s.request(sc_method, spellcheck_addr)
+
+    return r.text

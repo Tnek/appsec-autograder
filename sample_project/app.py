@@ -2,16 +2,15 @@ import os
 from flask import Flask
 from models import db
 
+
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "changeme123")
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
 db.init_app(app)
 with app.app_context():
     db.create_all()
-
-
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "changeme123")
 
 from controllers import mod_auth
 

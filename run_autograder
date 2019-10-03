@@ -4,7 +4,7 @@ DEBUG=1
 RESULTS_PATH=$(pwd)/results.json
 
 if [ -z $DEBUG ]; then
-    mkdir /autograder/source/sample_project
+    mkdir -p /autograder/source/sample_project
     cp -r /autograder/submission/* /autograder/source/sample_project
 
     cd /autograder/source

@@ -25,12 +25,14 @@ fi
 SERVICES[0]="$!"
 
 cd /autograder/submission/
-REQUIREMENTS_PATH=`find /autograder/submission/ -name requirements.txt`
-if [ $REQUIREMENTS_PATH ]; then
-    cat $REQUIREMENTS_PATH | while read PACKAGE; do pip3 install "$PACKAGE"; done > /dev/null 2>&1
+if [ -f "requirements.txt" ]; then
+    pip3 install -r requirements.txt > /dev/null 2>&1
 else
     echo "FILE requirements.txt DOES NOT EXIST"
+    echo `pwd`
+    echo `ls pwd`
 fi
+
 cd /autograder/submission/
 flask run -p 5000 & #> /dev/null 2>&1 &
 if [ $? -ne 0 ]; then

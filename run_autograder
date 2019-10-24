@@ -1,19 +1,6 @@
 #!/bin/bash
-
-DEBUG=1
 RESULTS_PATH=/autograder/results/results.json
 mkdir -p /autograder/submission/
-PATH_TO_APP=`find -name app.py`
-APP_DIR=`dirname $PATH_TO_APP`
-cp -r $APP_DIR/* /autograder/submission/
-
-#if [ -z $DEBUG ]; then
-#    mkdir -p /autograder/submission/
-#    cp -r /autograder/submission/* /autograder/submission/
-
-#    cd /autograder/source
-#    RESULTS_PATH=/autograder/results/results.json
-#fi
 
 declare -a SERVICES
 
@@ -36,7 +23,7 @@ fi
 cd /autograder/submission/
 flask run -p 5000 & #> /dev/null 2>&1 &
 if [ $? -ne 0 ]; then
-    echo "Could not launch applicaiton."
+    echo "Could not launch application."
     exit 1
 fi
 SERVICES[1]="$!"
@@ -48,6 +35,6 @@ python3 /autograder/source/grader/grader_runner.py > $RESULTS_PATH
 kill ${SERVICES[0]}
 kill ${SERVICES[1]}
 
-cd ..
+cd /autograder/
 
 cat /autograder/results/results.json

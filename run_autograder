@@ -1,33 +1,51 @@
 #!/bin/bash
 
 DEBUG=1
-RESULTS_PATH=$(pwd)/results.json
+RESULTS_PATH=/autograder/results/results.json
+mkdir -p /autograder/submission/
+PATH_TO_APP=`find -name app.py`
+APP_DIR=`dirname $PATH_TO_APP`
+cp -r $APP_DIR/* /autograder/submission/
 
-if [ -z $DEBUG ]; then
-    mkdir -p /autograder/source/sample_project
-    cp -r /autograder/submission/* /autograder/source/sample_project
+#if [ -z $DEBUG ]; then
+#    mkdir -p /autograder/submission/
+#    cp -r /autograder/submission/* /autograder/submission/
 
-    cd /autograder/source
-    RESULTS_PATH=/autograder/results/results.json
-fi
+#    cd /autograder/source
+#    RESULTS_PATH=/autograder/results/results.json
+#fi
 
 declare -a SERVICES
 
-python3 grader/callback_service.py > /dev/null 2>&1 &
+python3 /autograder/source/grader/callback_service.py > /dev/null 2>&1 &
+if [ $? -ne 0 ]; then
+    echo "callback_service won't run."
+    exit 1
+fi
 SERVICES[0]="$!"
 
-cd sample_project
-pip3 install -r requirements.txt > /dev/null 2>&1
-flask run -p 5000 > /dev/null 2>&1 &
+cd /autograder/submission/
+REQUIREMENTS_PATH=`find /autograder/submission/ -name requirements.txt`
+if [ $REQUIREMENTS_PATH ]; then
+    cat $REQUIREMENTS_PATH | while read PACKAGE; do pip3 install "$PACKAGE"; done > /dev/null 2>&1
+else
+    echo "FILE requirements.txt DOES NOT EXIST"
+fi
+cd /autograder/submission/
+flask run -p 5000 & #> /dev/null 2>&1 &
+if [ $? -ne 0 ]; then
+    echo "Could not launch applicaiton."
+    exit 1
+fi
 SERVICES[1]="$!"
-cd ../grader
+cd /autograder/source/grader
 sleep 3s
 
-python3 grader_runner.py > $RESULTS_PATH
+python3 /autograder/source/grader/grader_runner.py > $RESULTS_PATH
 
 kill ${SERVICES[0]}
 kill ${SERVICES[1]}
 
 cd ..
 
-cat results.json
+cat /autograder/results/results.json

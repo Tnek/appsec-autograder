@@ -14,18 +14,27 @@ def getFormMethod(text, eid):
     return soup.find("form", id=eid).get("method")
 
 
-def filterXsrfToken(soup_list):
+def filterXsrfToken(soup_list): #xsrf token assumption
     remainder = []
     xsrf_token = None
 
     for soup in soup_list:
-        input_name = soup.get("name").lower()
-
+        #print("INPUT")
+        input_elem = soup.get("name")
+        if not input_elem:
+            continue
+        #print("NOT CONT")
+        input_name = input_elem.lower()
+    
+        #print("TESTING FOR TOKEN")
         if "xsrf" in input_name or "csrf" in input_name:
             xsrf_token = soup
+            #print("HUH, WE'RE HERE")
         else:
+            #print("NEXT ONE")
             remainder.append(soup)
 
+    #print("RETURNING")
     return xsrf_token, remainder
 
 
@@ -36,8 +45,10 @@ def getSpellcheckForm(sess=None):
     r = sess.get(spellcheck_addr)
 
     soup = BeautifulSoup(r.text, "html.parser")
-    input_form = soup.find("form", id="inputtext")
-    return input_form
+    input_form = soup.find("input", id="inputtext")
+    if not input_form:
+        input_form = soup.find("textarea", id="inputtext")
+    return input_form, soup
 
 
 def registerAccount(uname, pword, twofactor, session=None):
@@ -45,25 +56,81 @@ def registerAccount(uname, pword, twofactor, session=None):
     if session is None:
         session = requests.Session()
 
-    test_creds = {"uname": uname, "pword": pword, "2fa": twofactor}
+    addr = SERVICE_ADDR + '/register'
+    r = session.get(addr)
+    soup = BeautifulSoup(r.text, "html.parser")
+    #TODO: FIX ME, CONTINUE FROM HERE
+    #form = soup.find("form", id="TODO: FILL IN ID")
+    form = soup.find_all("form")
+    assert(len(form) == 1)
+    form = form[0]
+
+    inputs = form.find_all("input")
+    token, remainder = filterXsrfToken(inputs)
+
+    uname_form = soup.find("input", id="uname")
+    #print(f"REG: {str(uname_form)}")
+    pword_form = soup.find("input", id="pword")
+    twofactor_form = soup.find("input", id="2fa")
+
+    assert uname_form is not None, "Could not find uname input."
+    assert pword_form is not None, "Could not find pword input."
+    assert twofactor_form is not None, "Could not find 2fa input."
+
+    if token is not None:
+        test_creds = {uname_form.get("name"): uname, pword_form.get('name'): pword, twofactor_form.get('name'): twofactor, token.get('name'): token.get('value')}
+    else:
+        test_creds = {uname_form.get("name"): uname, pword_form.get('name'): pword, twofactor_form.get('name'): twofactor}
+
     r = session.post(addr, data=test_creds)
+    #print(BeautifulSoup(r.text, "html.parser").beautify())
+    #print(r.text)
+    ##print("\n\n\n")
     success = getElementById(r.text, "success")
     assert success != None, "Missing id='success' in your register response"
-
-    return "success" in success.text
+    #print(success.text.lower())
+    #print("REGISTRATION")
+    return "success" in success.text.lower()
 
 
 def login(uname, pword, twofactor, session=None):
     addr = SERVICE_ADDR + "/login"
     if session is None:
         session = requests.Session()
+    
+    r = session.get(addr)
+    soup = BeautifulSoup(r.text, "html.parser")
+    #TODO: FIX ME, CONTINUE FROM HERE
+    #form = soup.find("form", id="TODO: FILL IN ID")
+    form = soup.find_all("form")
+    assert(len(form) == 1)
+    form = form[0]
 
-    test_creds = {"uname": uname, "pword": pword, "2fa": twofactor}
+    inputs = form.find_all("input")
+    token, remainder = filterXsrfToken(inputs)
+
+    #TODO: FIX ME, USE NAME ATTRIBUTES GRABBED BY INPUT IDs.
+    uname_form = soup.find("input", id="uname")
+    pword_form = soup.find("input", id="pword")
+    twofactor_form = soup.find("input", id="2fa")
+    #print(f"LOG: {str(uname_form)}")
+
+    assert uname_form is not None, "Could not find uname input."
+    assert pword_form is not None, "Could not find pword input."
+    assert twofactor_form is not None, "Could not find 2fa input."
+
+    if token is not None:
+        test_creds = {uname_form.get("name"): uname, pword_form.get('name'): pword, twofactor_form.get('name'): twofactor, token.get('name'): token.get('value')}
+    else:
+        test_creds = {uname_form.get("name"): uname, pword_form.get('name'): pword, twofactor_form.get('name'): twofactor}
+
     r = session.post(addr, data=test_creds)
     success = getElementById(r.text, "result")
+    #print(r.text)
+    ##print("\n\n\n")
     assert success != None, "Missing id='result' in your login response"
-
-    return "success" in success.text
+    #print("LOGIN")
+    return "success" in success.text.lower()
 
 
 def initSession(uname, pword, twofactor):
@@ -92,7 +159,7 @@ def spellcheck(test_text, uname, pword, twofactor, s=None):
         s = initSession(uname, pword, twofactor)
     spellcheck_args = {}
 
-    form = getSpellcheckForm(s)
+    form, soup = getSpellcheckForm(s)
     assert form != None, "Spellcheck form is missing id='inputtext'"
 
     inputs = form.find_all("input")
@@ -105,7 +172,12 @@ def spellcheck(test_text, uname, pword, twofactor, s=None):
     for i in remainder:
         spellcheck_args[i.get("name")] = test_text
 
-    sc_method = form.get("method", "get").lower()
+    #print("HERE")
+    #print("\n\n\n")
+    #print("SPELLCHECK")
+    sc_method = form.get("method", "post").lower()
+    #print("THERE")
+    #print("\n\n\n")
 
     if sc_method == "post":
         r = s.request(sc_method, spellcheck_addr)

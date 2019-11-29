@@ -39,7 +39,6 @@ class AdminXssFixture(unittest.TestCase):
         # payload = build_payload()
         # spellcheck(payload, uname, password, twofactor, s)
         queries = getQueryIds(s, uname)
-        self.assertNotEqual(len(queries), 0, "Cannot get query history.")
 
         time.sleep(1)
 
@@ -87,7 +86,6 @@ class AdminXssFixture(unittest.TestCase):
         time.sleep(1)
 
         queries = getQueryIds(s, uname)
-        self.assertNotEqual(len(queries), 0, "Cannot get query history.")
 
         for queryid in queries:
             asyncio.ensure_future(

@@ -169,6 +169,9 @@ def initSession(uname, pword, twofactor):
 
 def getQueryIds(s, uname):
     hist = s.get("%s/%s/history" % (SERVICE_ADDR, uname))
+    if hist.status_code == 404:
+        hist = s.get("%s/history" % (SERVICE_ADDR))
+
     soup = BeautifulSoup(hist.text, "html.parser")
     queries = soup.findAll(id=re.compile("query\d+"))
     return [i.get("id") for i in queries]

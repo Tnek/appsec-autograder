@@ -19,11 +19,12 @@ class FeatureTest(unittest.TestCase):
         PAGES = ["/register", "/login", "/spell_check"]
         for page in PAGES:
             r = requests.get(SERVICE_ADDR + page)
-            #self.assertEqual(r.status_code, 200)
-            if page != "/spell_checl":
+            if page != "/spell_check":
                 self.assertEqual(r.status_code, 200)
             else:
-                self.assertTrue(r.status_code == 401 or r.status_code == 403 or r.status_code == 200)
+                self.assertTrue(
+                    r.status_code == 401 or r.status_code == 403 or r.status_code == 200
+                )
 
     @weight(3)
     def test_invalid_auth(self):
@@ -60,7 +61,7 @@ class FeatureTest(unittest.TestCase):
 
         self.assertNotEqual(
             second_token.get("value"), token.get("value"), "Using static CSRF token"
-        )  
+        )
 
     @weight(2)
     def test_spellcheck(self):

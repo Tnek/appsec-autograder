@@ -1,0 +1,56 @@
+#!/bin/bash
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+DEBUG=1
+RESULTS_PATH=/autograder/results/results.json
+mkdir =p /autograder/source/sample_project
+PATH_TO_APP=`find -name app.py`
+APP_DIR=`dirname $PATH_TO_APP`
+AOUT_PATH=`find /autograder/submission -name spell_check`
+chmod +x $AOUT_PATH
+cp -r $APP_DIR/* /autograder/source/sample_project
+cp /autograder/source/a.out /autograder/source/sample_project/a.out
+chmod +x /autograder/source/sample_project/a.out
+#if [ -z $DEBUG ]; then
+#    mkdir -p /autograder/source/sample_project
+#    cp -r /autograder/submission/* /autograder/source/sample_project
+#
+#    cd /autograder/source
+#    RESULTS_PATH=/autograder/results/results.json
+#fi
+
+declare -a SERVICES
+
+python3 /autograder/source/grader/callback_service.py > /dev/null 2>&1 &
+if [ $? -ne 0 ]; then
+    echo "Callback_service won't run. Please inform the professor."
+    exit 1
+fi
+SERVICES[0]="$!"
+
+cd /autograder/source/sample_project
+REQUIREMENTS_PATH=`find /autograder/source/sample_project/ -name requirements.txt`
+if [ $REQUIREMENTS_PATH ]; then
+    cat $REQUIREMENTS_PATH | while read PACKAGE; do pip3 install "$PACKAGE"; done >/dev/null 2>&1
+else
+    echo "FILE requirements.txt NOT FOUND. - NO INSTALLATIONS PERFORMED."
+fi
+#pip3 install -r requirements.txt > /dev/null 2>&1
+flask run -p 5000 & #> /dev/null 2>&1 &
+if [ $? -ne 0 ]; then
+    echo "Could not launch application."
+    exit 1
+fi
+SERVICES[1]="$!"
+cd /autograder/source/grader
+sleep 3s
+
+python3 /autograder/source/grader/grader_runner.py > $RESULTS_PATH
+
+kill ${SERVICES[0]}
+kill ${SERVICES[1]}
+
+cd ..
+
+cat results.json

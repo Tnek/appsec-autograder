@@ -34,7 +34,7 @@ class ExtendedFeatureTest(unittest.TestCase):
 
             if not text:
                 qid, uname, text, results = parse_query(
-                    user2_s.get("%s/%s/history" % (SERVICE_ADDR, q_id))
+                    user2_s.get("%s/%s/history" % (SERVICE_ADDR, uname))
                 )
 
             self.assertTrue(
@@ -67,7 +67,7 @@ class ExtendedFeatureTest(unittest.TestCase):
 
             if not text:
                 qid, uname, text, results = parse_query(
-                    user2_s.get("%s/%s/history" % (SERVICE_ADDR, q_id))
+                    s.get("%s/%s/history/%s" % (SERVICE_ADDR, uname, q_id))
                 )
 
             self.assertFalse(
@@ -96,7 +96,7 @@ class ExtendedFeatureTest(unittest.TestCase):
 
             if not text:
                 qid, uname, text, results = parse_query(
-                    user2_s.get("%s/%s/history" % (SERVICE_ADDR, q_id))
+                    s.get("%s/%s/history/%s" % (SERVICE_ADDR, uame, q_id))
                 )
 
             self.assertTrue(

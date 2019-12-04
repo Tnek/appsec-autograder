@@ -28,7 +28,7 @@ class ExtendedFeatureTest(unittest.TestCase):
         user2_s = requests.Session()
         login("admin", "Administrator@1", "12345678901", user2_s)
         for q_id in q_ids:  # If there are no q_ids?
-            qid, uname, text, results = parse_query(
+            qid, name, text, results = parse_query(
                 user2_s.get("%s/history/%s" % (SERVICE_ADDR, q_id))
             )
 
@@ -61,13 +61,13 @@ class ExtendedFeatureTest(unittest.TestCase):
         uname2 = "unauthtest2"
         user2_s = initSession(uname2, password, twofactor)
         for q_id in q_ids:
-            qid, uname, text, results = parse_query(
+            qid, name, text, results = parse_query(
                 user2_s.get("%s/history/%s" % (SERVICE_ADDR, q_id))
             )
 
             if not text:
                 qid, uname, text, results = parse_query(
-                    s.get("%s/%s/history/%s" % (SERVICE_ADDR, uname, q_id))
+                    user2_s.get("%s/%s/history/%s" % (SERVICE_ADDR, uname, q_id))
                 )
 
             self.assertFalse(
@@ -90,13 +90,13 @@ class ExtendedFeatureTest(unittest.TestCase):
         self.assertNotEqual(len(q_ids), 0, "Could not find query history.")
 
         for q_id in q_ids:  # If there are no q_ids?
-            qid, uname, text, results = parse_query(
+            qid, name, text, results = parse_query(
                 s.get("%s/history/%s" % (SERVICE_ADDR, q_id))
             )
 
             if not text:
                 qid, uname, text, results = parse_query(
-                    s.get("%s/%s/history/%s" % (SERVICE_ADDR, uame, q_id))
+                    s.get("%s/%s/history/%s" % (SERVICE_ADDR, uname, q_id))
                 )
 
             self.assertTrue(

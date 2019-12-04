@@ -32,6 +32,11 @@ class ExtendedFeatureTest(unittest.TestCase):
                 user2_s.get("%s/history/%s" % (SERVICE_ADDR, q_id))
             )
 
+            if not text:
+                qid, uname, text, results = parse_query(
+                    user2_s.get("%s/%s/history" % (SERVICE_ADDR, q_id))
+                )
+
             self.assertTrue(
                 text and sensitive_text in text.text.strip().lstrip(),
                 "Admins can't view queries",
@@ -60,6 +65,11 @@ class ExtendedFeatureTest(unittest.TestCase):
                 user2_s.get("%s/history/%s" % (SERVICE_ADDR, q_id))
             )
 
+            if not text:
+                qid, uname, text, results = parse_query(
+                    user2_s.get("%s/%s/history" % (SERVICE_ADDR, q_id))
+                )
+
             self.assertFalse(
                 text and sensitive_text in text, "Users can view unauthorized queries"
             )
@@ -83,6 +93,11 @@ class ExtendedFeatureTest(unittest.TestCase):
             qid, uname, text, results = parse_query(
                 s.get("%s/history/%s" % (SERVICE_ADDR, q_id))
             )
+
+            if not text:
+                qid, uname, text, results = parse_query(
+                    user2_s.get("%s/%s/history" % (SERVICE_ADDR, q_id))
+                )
 
             self.assertTrue(
                 text and sensitive_text in text.text, "User can't view queries"
